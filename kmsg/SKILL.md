@@ -38,6 +38,23 @@ kmsg send "채팅방" "메시지" --dry-run      # 전송 테스트 (실제 발�
 
 ## Workflow
 
+### 0. 화면/창 컨텍스트 검증 (필수)
+
+`kmsg` 실행 전 아래를 먼저 확인:
+
+1. **카카오톡 메인 목록창("카카오톡")이 전면인지 확인**
+2. **이미 열린 채팅창이 있으면 닫기** (목록창만 남기기)
+3. 목록에서 대상을 찾을 때는 **첫 번째 결과 자동 선택 금지**
+4. 대상 진입 후에는 **현재 창 제목이 요청한 채팅방 이름과 일치하는지 재확인**
+5. 불일치 시 즉시 중단 후 목록으로 복귀
+
+권장 점검 명령:
+
+```bash
+kmsg chats --limit 30 --verbose   # 목록/미리보기 확인
+kmsg inspect --depth 2            # 현재 포커스 창/목록 구조 확인
+```
+
 ### 1. 메시지 읽기
 
 ```bash
@@ -93,6 +110,8 @@ kmsg send "채팅방" "test" --trace-ax --dry-run
 2. **--dry-run 우선** - 의심스러우면 먼저 드라이런
 3. **비공식 도구** - 과도한 사용 시 계정 제한 가능
 4. **Accessibility 권한** - System Settings > Privacy & Security > Accessibility에서 kmsg 허용 필요
+5. **창 이름 검증 필수** - 대상 진입 후 현재 창 제목이 요청한 채팅방 이름과 일치하지 않으면 즉시 중단
+6. **방 내부 재검색 금지** - 채팅방 내부 화면에서 추가 검색/재탐색하지 말고 목록창으로 돌아간 뒤 재시도
 
 ## Sequential Send (다수 수신자 전송)
 
@@ -112,3 +131,5 @@ kmsg send "채팅방" "test" --trace-ax --dry-run
 | `ACCESSIBILITY_PERMISSION_DENIED` | 권한 미부여 | System Settings에서 권한 허용 |
 | `KAKAO_WINDOW_UNAVAILABLE` | 카톡 미실행/창 없음 | 카카오톡 실행 후 재시도, `--deep-recovery` |
 | `CHAT_NOT_FOUND` | 채팅방 검색 실패 | 채팅방 이름 확인, `--deep-recovery` |
+| `WINDOW_NOT_READY` | 다른 창이 전면/채팅창 미오픈 | 목록창(`카카오톡`) 전면화, 열린 채팅창 정리 후 재시도 |
+| `SEARCH_MISS` | 유사 이름/오픈채팅 검색 누락 | 검색어 축소 후 **이름 완전일치** 확인, 필요 시 사용자가 방을 먼저 열기 |
