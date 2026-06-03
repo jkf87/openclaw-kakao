@@ -16,7 +16,8 @@ Use this reference when the user asks to send KakaoTalk messages on Windows by d
 4. Never type into a field unless the target field is visually verified.
 5. Verify the result row name before opening it.
 6. Verify the opened chat title before entering the message.
-7. Verify a new outgoing message bubble after sending.
+7. After pasting into the message field, verify the composed text is the intended full message before pressing Enter or Send.
+8. Verify a new outgoing message bubble after sending.
 
 ## Stable OpenChat Workflow
 
@@ -30,10 +31,10 @@ Use this reference when the user asks to send KakaoTalk messages on Windows by d
 5. Click inside the left text area of that search field, away from the `+` icon and away from the window edge.
 6. Paste the search text from the clipboard. Do not press `Ctrl+A` first.
 7. Wait for results and read the visible result row text.
-8. Open only a row whose visible room name matches the requested room. Use double-click only if single-click does not open it.
+8. Open only a row whose visible room name matches the requested room. Do not press Enter from the search field unless the exact matching row is visibly selected. Use a coordinate click on the matching row, and double-click only if single-click does not open it.
 9. Confirm the opened window title matches the room name.
-10. Click the message input area, paste the message, and confirm the send button is enabled.
-11. Click send.
+10. Click the message input area, paste the message, and visually confirm the input contains the intended full message. If only a shortcut letter such as `v` appears, do not send; clear the field and retry paste with a lower-level key event or ask the user to take over.
+11. Click send or press Enter only after the composed text has been verified.
 12. Confirm the new outgoing yellow bubble appears.
 
 ## Clearing Existing Search Text
@@ -73,5 +74,6 @@ Abort and report if:
 - The visible search results do not include the requested room.
 - The opened chat title does not match the requested room.
 - The message field cannot be identified.
+- The pasted message text cannot be visually verified before sending.
 - A modal appears repeatedly.
 - The user corrects the workflow or asks to pause.
