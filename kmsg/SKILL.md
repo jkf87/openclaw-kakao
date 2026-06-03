@@ -1,13 +1,15 @@
 ---
 name: kmsg
 description: >
-  macOS 카카오톡(KakaoTalk) 메시지 자동화 CLI 도구.
-  메시지 읽기, 보내기, 채팅 목록 조회를 지원하며 MCP 서버를 통한 에이전트 통합 가능.
+  KakaoTalk 메시지 자동화 스킬. macOS에서는 kmsg CLI로 메시지 읽기, 보내기,
+  채팅 목록 조회를 지원하고, Windows에서는 kmsg 없이 화면을 직접 조작하는 CUA
+  워크플로우로 카카오톡/오픈채팅 메시지를 보낸다.
   Use when: (1) 카카오톡 메시지를 읽거나 보내야 할 때,
   (2) "카톡 보내줘", "카카오톡 메시지 읽어줘", "채팅 목록 보여줘" 요청 시,
-  (3) KakaoTalk 자동화 또는 kmsg CLI 관련 작업,
-  (4) MCP를 통한 카카오톡 에이전트 통합 설정 시.
-  macOS 13+, KakaoTalk macOS 앱, Accessibility 권한 필요.
+  (3) KakaoTalk 자동화, kmsg CLI, 또는 Windows CUA 직접 조작 작업,
+  (4) MCP를 통한 카카오톡 에이전트 통합 설정 시,
+  (5) 사용자가 kmsg를 쓰지 말고 직접 CUA로 카카오톡을 조작하라고 할 때.
+  macOS 13+, KakaoTalk macOS 앱, Accessibility 권한 또는 Windows KakaoTalk 앱 필요.
 ---
 
 # kmsg - KakaoTalk CLI
@@ -28,6 +30,8 @@ bash <skill-path>/scripts/install.sh
 
 ## Quick Reference
 
+macOS/kmsg:
+
 ```bash
 kmsg status                              # 상태 확인
 kmsg chats                               # 채팅 목록
@@ -35,6 +39,12 @@ kmsg read "채팅방" --limit 20 --json      # 메시지 읽기 (JSON)
 kmsg send "채팅방" "메시지"                # 메시지 전송
 kmsg send "채팅방" "메시지" --dry-run      # 전송 테스트 (실제 발송 안 함)
 ```
+
+Windows/CUA:
+
+- kmsg 명령을 사용하지 말고 카카오톡 Windows 앱을 직접 조작한다.
+- 오픈채팅 또는 검색창 조작이 필요하면 먼저 [references/windows-cua.md](references/windows-cua.md)를 읽는다.
+- 검색창에 포커스를 줄 때 `Ctrl+A`를 사용하지 않는다. 기존 텍스트는 검색창의 `X` 버튼으로 지우고 진행한다.
 
 ## Workflow
 
@@ -105,7 +115,19 @@ kmsg read "채팅방" --limit 5 --trace-ax   # AX 트레이싱
 kmsg send "채팅방" "test" --trace-ax --dry-run
 ```
 
-### 4. 다중 방 대량 요약(미읽음 기준) 안정화 워크플로우
+### 4. Windows CUA 직접 전송
+
+Windows에서 카카오톡을 조작하거나 사용자가 "kmsg 쓰지 말고 직접 CUA"라고 요청하면 [references/windows-cua.md](references/windows-cua.md)를 따른다.
+
+핵심 원칙:
+
+1. **친구 추가/다른 모달이 보이면 검색을 시작하지 않는다.**
+2. 대상이 오픈채팅이면 **오픈채팅 탭**과 `채팅방, 참여자 검색` placeholder를 먼저 확인한다.
+3. 검색어 입력 전/중 **`Ctrl+A` 금지**. 클릭 후 클립보드 붙여넣기만 사용한다.
+4. 결과 방 이름과 열린 채팅방 제목을 확인한 뒤 메시지를 입력한다.
+5. 전송 후 새 말풍선이 생겼는지 확인한다.
+
+### 5. 다중 방 대량 요약(미읽음 기준) 안정화 워크플로우
 
 대량 테스트(예: "100+ 미읽음 방 전부 요약")에서는 아래 순서를 고정한다.
 
@@ -149,12 +171,19 @@ PY
 5. **창 이름 검증 필수** - 대상 진입 후 현재 창 제목이 요청한 채팅방 이름과 일치하지 않으면 즉시 중단
 6. **방 내부 재검색 금지** - 채팅방 내부 화면에서 추가 검색/재탐색하지 말고 목록창으로 돌아간 뒤 재시도
 7. **결과 행 텍스트 검증 우선** - 검색 결과에서 행 텍스트를 직접 확인한 뒤 요청 이름과 완전일치할 때만 열기(순번 클릭 금지)
+8. **Windows 검색창에서 Ctrl+A 금지** - 포커스가 빗나가면 친구 추가 팝업 등 다른 UI가 열릴 수 있다. 검색어는 빈 검색창에 단순 붙여넣기.
 
 ## Sequential Send (다수 수신자 전송)
 
 여러 명에게 순차 전송이 필요할 때: [references/sequential-send.md](references/sequential-send.md)
 - 호칭 포함 메시지 템플릿, 안전 규칙, 실패 처리
 - kmsg 없이 AppleScript로 직접 전송하는 Fallback 방식 포함
+
+## Windows CUA
+
+Windows KakaoTalk 앱에서 직접 화면 조작으로 보내야 할 때: [references/windows-cua.md](references/windows-cua.md)
+- 오픈채팅 검색, 친구 추가 팝업 회피, `Ctrl+A` 금지, 방 제목 검증, 말풍선 확인 절차 포함
+- kmsg CLI를 사용하지 않는 요청에 사용
 
 ## MCP Integration
 
@@ -170,3 +199,4 @@ PY
 | `CHAT_NOT_FOUND` | 채팅방 검색 실패 | 채팅방 이름 확인, `--deep-recovery` |
 | `WINDOW_NOT_READY` | 다른 창이 전면/채팅창 미오픈 | 목록창(`카카오톡`) 전면화, 열린 채팅창 정리 후 재시도 |
 | `SEARCH_MISS` | 유사 이름/오픈채팅 검색 누락 | 검색어 축소 후 **이름 완전일치** 확인, 필요 시 사용자가 방을 먼저 열기 |
+| `WINDOWS_WRONG_INPUT_TARGET` | Windows에서 검색어가 친구 추가 팝업/다른 입력칸에 들어감 | 즉시 중단, 팝업 닫힘 확인, 오픈채팅 검색 placeholder 확인 후 `Ctrl+A` 없이 재시도 |
